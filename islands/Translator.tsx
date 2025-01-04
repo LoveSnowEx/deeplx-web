@@ -1,6 +1,9 @@
 import type { Signal } from "@preact/signals";
 import LanguageSelector from "../components/LanguageSelector.tsx";
 import TranslationArea from "../components/TranslationArea.tsx";
+import { IS_BROWSER } from "$fresh/runtime.ts";
+
+const TRANSLATION_API_URL = "/api/translate";
 
 interface TranslatorProps {
   sourceLanguage: Signal<string>;
@@ -21,6 +24,31 @@ export default function Translator(
     ];
     [sourceText.value, targetText.value] = [targetText.value, sourceText.value];
   }
+  sourceText.subscribe(async () => {
+    if (!IS_BROWSER) {
+      return;
+    }
+    if (sourceText.value === "") {
+      targetText.value = "";
+      return;
+    }
+    const response = await fetch(TRANSLATION_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        "source_lang": sourceLanguage.value,
+        "target_lang": targetLanguage.value,
+        "text": sourceText.value,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const result = await response.json();
+    targetText.value = result.data;
+  });
   return (
     <div class="w-full flex flex-col shadow-md">
       <div class="w-full flex flex-row">
