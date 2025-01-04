@@ -9,8 +9,7 @@ import * as $api_joke from "./routes/api/joke.ts";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
 import * as $Counter from "./islands/Counter.tsx";
-import * as $LanguageSelector from "./islands/LanguageSelector.tsx";
-import * as $LanguageSelectors from "./islands/LanguageSelectors.tsx";
+import * as $Translator from "./islands/Translator.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -24,8 +23,7 @@ const manifest = {
   },
   islands: {
     "./islands/Counter.tsx": $Counter,
-    "./islands/LanguageSelector.tsx": $LanguageSelector,
-    "./islands/LanguageSelectors.tsx": $LanguageSelectors,
+    "./islands/Translator.tsx": $Translator,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

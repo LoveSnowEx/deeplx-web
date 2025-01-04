@@ -1,5 +1,5 @@
 import type { Signal } from "@preact/signals";
-import LanguageSelector from "./LanguageSelector.tsx";
+import LanguageSelector from "../components/LanguageSelector.tsx";
 
 interface LanguageSelectorsProps {
   sourceLabel?: string;
@@ -20,7 +20,7 @@ export default function LanguageSelectors(
     ];
   }
   return (
-    <div class="w-full flex flex-row">
+    <>
       <LanguageSelector
         id="source-language"
         label={sourceLabel}
@@ -54,6 +54,6 @@ export default function LanguageSelectors(
         value={targetLanguage}
         languages={languages}
       />
-    </div>
+    </>
   );
 }
