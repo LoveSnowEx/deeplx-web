@@ -19,6 +19,7 @@ export default function Translator(
       targetLanguage.value,
       sourceLanguage.value,
     ];
+    [sourceText.value, targetText.value] = [targetText.value, sourceText.value];
   }
   return (
     <div class="w-full flex flex-col shadow-md">
