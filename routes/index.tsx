@@ -2,17 +2,13 @@ import { useSignal } from "@preact/signals";
 import Translator from "../islands/Translator.tsx";
 
 export default function Home() {
-  const sourceLanguage = useSignal("AR");
-  const targetLanguage = useSignal("DE");
+  const sourceLanguage = useSignal("EN-US");
+  const targetLanguage = useSignal("ZH-HANT");
   const sourceText = useSignal("");
   const targetText = useSignal("");
   const languages = [
-    { code: "AR", name: "Arabic" },
-    { code: "BG", name: "Bulgarian" },
-    { code: "CS", name: "Czech" },
-    { code: "DA", name: "Danish" },
-    { code: "DE", name: "German" },
-    { code: "EL", name: "Greek" },
+    { code: "EN-US", name: "English (American)" },
+    { code: "ZH-HANT", name: "Chinese (traditional)" },
   ];
 
   return (
