@@ -3,8 +3,10 @@ import LanguageSelector from "../components/LanguageSelector.tsx";
 import TranslationArea from "../components/TranslationArea.tsx";
 import { IS_BROWSER } from "$fresh/runtime.ts";
 import { debounce } from "https://deno.land/x/debounce@v0.0.7/mod.ts";
+import { Cache } from "https://deno.land/x/local_cache@1.0/mod.ts";
 
 const TRANSLATION_API_URL = "/api/translate";
+const cache = new Cache<string, string>(1000 * 60 * 60 * 24);
 
 interface TranslatorProps {
   sourceLanguage: Signal<string>;
@@ -33,22 +35,28 @@ export default function Translator(
       targetText.value = "";
       return;
     }
+    const body = JSON.stringify({
+      "source_lang": sourceLanguage.value,
+      "target_lang": targetLanguage.value,
+      "text": sourceText.value,
+    });
+    if (cache.has(body)) {
+      targetText.value = cache.get(body);
+      return;
+    }
     const response = await fetch(TRANSLATION_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        "source_lang": sourceLanguage.value,
-        "target_lang": targetLanguage.value,
-        "text": sourceText.value,
-      }),
+      body: body,
     });
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
     const result = await response.json();
     targetText.value = result.data;
+    cache.set(body, result.data);
   }, 500);
 
   sourceText.subscribe(() => {
