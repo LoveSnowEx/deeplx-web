@@ -2,6 +2,7 @@ import type { Signal } from "@preact/signals";
 import LanguageSelector from "../components/LanguageSelector.tsx";
 import TranslationArea from "../components/TranslationArea.tsx";
 import { IS_BROWSER } from "$fresh/runtime.ts";
+import { debounce } from "https://deno.land/x/debounce@v0.0.7/mod.ts";
 
 const TRANSLATION_API_URL = "/api/translate";
 
@@ -24,7 +25,7 @@ export default function Translator(
     ];
     [sourceText.value, targetText.value] = [targetText.value, sourceText.value];
   }
-  sourceText.subscribe(async () => {
+  const translate = debounce(async () => {
     if (!IS_BROWSER) {
       return;
     }
@@ -48,6 +49,10 @@ export default function Translator(
     }
     const result = await response.json();
     targetText.value = result.data;
+  }, 500);
+
+  sourceText.subscribe(() => {
+    translate();
   });
   return (
     <div class="w-full flex flex-col shadow-md">
