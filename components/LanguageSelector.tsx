@@ -6,7 +6,7 @@ interface LanguageSelectorProps {
   label?: string;
   value: Signal<string>;
   languages: { code: string; name: string }[];
-  props?: JSX.HTMLAttributes<HTMLDivElement>
+  props?: JSX.HTMLAttributes<HTMLDivElement>;
 }
 
 export default function LanguageSelector(

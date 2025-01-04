@@ -17,13 +17,13 @@ export default function Home() {
 
   return (
     <div class="my-12 w-full flex flex-grow">
-        <Translator
-          sourceLanguage={sourceLanguage}
-          targetLanguage={targetLanguage}
-          sourceText={sourceText}
-          targetText={targetText}
-          languages={languages}
-        />
+      <Translator
+        sourceLanguage={sourceLanguage}
+        targetLanguage={targetLanguage}
+        sourceText={sourceText}
+        targetText={targetText}
+        languages={languages}
+      />
     </div>
   );
 }
