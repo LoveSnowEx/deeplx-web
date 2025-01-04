@@ -1,3 +1,4 @@
+import { JSX } from "preact";
 import type { Signal } from "@preact/signals";
 
 interface LanguageSelectorProps {
@@ -5,13 +6,14 @@ interface LanguageSelectorProps {
   label?: string;
   value: Signal<string>;
   languages: { code: string; name: string }[];
+  props?: JSX.HTMLAttributes<HTMLDivElement>
 }
 
 export default function LanguageSelector(
-  { id, label, value, languages }: LanguageSelectorProps,
+  { id, label, value, languages, props }: LanguageSelectorProps,
 ) {
   return (
-    <div class="flex-1">
+    <div {...props}>
       <label for={id} class="my-2 font-bold">{label}</label>
       <select
         id={id}
