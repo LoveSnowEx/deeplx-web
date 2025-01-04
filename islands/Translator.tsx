@@ -1,4 +1,4 @@
-import type { Signal } from "@preact/signals";
+import { type Signal, useSignal } from "@preact/signals";
 import LanguageSelector from "../components/LanguageSelector.tsx";
 import TranslationArea from "../components/TranslationArea.tsx";
 import { IS_BROWSER } from "$fresh/runtime.ts";
@@ -9,39 +9,93 @@ const TRANSLATION_API_URL = "/api/translate";
 const cache = new Cache<string, string>(1000 * 60 * 60 * 24);
 
 interface TranslatorProps {
+  defaultSourceLanguage?: string;
+  defaultTargetLanguage?: string;
+  defaultSourceText?: string;
+  defaultTargetText?: string;
+  languages: { code: string; name: string }[];
+}
+
+class TranslationState {
   sourceLanguage: Signal<string>;
   targetLanguage: Signal<string>;
   sourceText: Signal<string>;
   targetText: Signal<string>;
-  languages: { code: string; name: string }[];
+
+  constructor(
+    sourceLanguage?: string,
+    targetLanguage?: string,
+    sourceText?: string,
+    targetText?: string,
+  ) {
+    this.sourceLanguage = useSignal(
+      localStorage.getItem("sourceLanguage") || sourceLanguage || "EN-US",
+    );
+    this.targetLanguage = useSignal(
+      localStorage.getItem("targetLanguage") || targetLanguage || "ZH-HANT",
+    );
+    this.sourceText = useSignal(
+      localStorage.getItem("sourceText") || sourceText || "",
+    );
+    this.targetText = useSignal(
+      localStorage.getItem("targetText") || targetText || "",
+    );
+  }
+
+  swapLanguages() {
+    [this.sourceLanguage.value, this.targetLanguage.value] = [
+      this.targetLanguage.value,
+      this.sourceLanguage.value,
+    ];
+    [this.sourceText.value, this.targetText.value] = [
+      this.targetText.value,
+      this.sourceText.value,
+    ];
+  }
+
+  saveLocalStorage() {
+    localStorage.setItem("sourceLanguage", this.sourceLanguage.value);
+    localStorage.setItem("targetLanguage", this.targetLanguage.value);
+    localStorage.setItem("sourceText", this.sourceText.value);
+    localStorage.setItem("targetText", this.targetText.value);
+  }
 }
 
 export default function Translator(
-  { sourceLanguage, targetLanguage, sourceText, targetText, languages }:
-    TranslatorProps,
+  {
+    defaultSourceLanguage,
+    defaultTargetLanguage,
+    defaultSourceText,
+    defaultTargetText,
+    languages,
+  }: TranslatorProps,
 ) {
+  const translationState = new TranslationState(
+    defaultSourceLanguage,
+    defaultTargetLanguage,
+    defaultSourceText,
+    defaultTargetText,
+  );
   function handleSwapLanguages() {
-    [sourceLanguage.value, targetLanguage.value] = [
-      targetLanguage.value,
-      sourceLanguage.value,
-    ];
-    [sourceText.value, targetText.value] = [targetText.value, sourceText.value];
+    translationState.swapLanguages();
   }
   const translate = debounce(async () => {
     if (!IS_BROWSER) {
       return;
     }
-    if (sourceText.value === "") {
-      targetText.value = "";
+    if (translationState.sourceText.value === "") {
+      translationState.targetText.value = "";
+      translationState.saveLocalStorage();
       return;
     }
     const body = JSON.stringify({
-      "source_lang": sourceLanguage.value,
-      "target_lang": targetLanguage.value,
-      "text": sourceText.value,
+      "source_lang": translationState.sourceLanguage.value,
+      "target_lang": translationState.targetLanguage.value,
+      "text": translationState.sourceText.value,
     });
     if (cache.has(body)) {
-      targetText.value = cache.get(body);
+      translationState.targetText.value = cache.get(body);
+      translationState.saveLocalStorage();
       return;
     }
     const response = await fetch(TRANSLATION_API_URL, {
@@ -55,11 +109,12 @@ export default function Translator(
       throw new Error("Network response was not ok");
     }
     const result = await response.json();
-    targetText.value = result.data;
+    translationState.targetText.value = result.data;
+    translationState.saveLocalStorage();
     cache.set(body, result.data);
   }, 500);
 
-  sourceText.subscribe(() => {
+  translationState.sourceText.subscribe(() => {
     translate();
   });
   return (
@@ -67,7 +122,7 @@ export default function Translator(
       <div class="w-full flex flex-row">
         <LanguageSelector
           id="source-language"
-          value={sourceLanguage}
+          value={translationState.sourceLanguage}
           languages={languages}
           props={{ class: "flex-1" }}
         />
@@ -94,7 +149,7 @@ export default function Translator(
         </button>
         <LanguageSelector
           id="target-language"
-          value={targetLanguage}
+          value={translationState.targetLanguage}
           languages={languages}
           props={{ class: "flex-1" }}
         />
@@ -103,7 +158,7 @@ export default function Translator(
         <div class="w-full flex flex-row">
           <TranslationArea
             id="source-text"
-            value={sourceText}
+            value={translationState.sourceText}
             placeholder="Enter source text"
             readonly={false}
             rows={10}
@@ -112,7 +167,7 @@ export default function Translator(
           </TranslationArea>
           <TranslationArea
             id="target-text"
-            value={targetText}
+            value={translationState.targetText}
             placeholder="Translation will appear here"
             readonly={true}
             rows={10}
