@@ -1,9 +1,7 @@
 import { useSignal } from "@preact/signals";
-import Counter from "../islands/Counter.tsx";
 import LanguageSelectors from "../islands/Translator.tsx";
 
 export default function Home() {
-  const count = useSignal(3);
   const sourceLanguage = useSignal("AR");
   const targetLanguage = useSignal("DE");
   const languages = [
