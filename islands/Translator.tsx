@@ -70,6 +70,7 @@ export default function Translator(
     languages,
   }: TranslatorProps,
 ) {
+  if (!IS_BROWSER) return <div></div>;
   const translationState = new TranslationState(
     defaultSourceLanguage,
     defaultTargetLanguage,
@@ -80,9 +81,6 @@ export default function Translator(
     translationState.swapLanguages();
   }
   const translate = debounce(async () => {
-    if (!IS_BROWSER) {
-      return;
-    }
     if (translationState.sourceText.value === "") {
       translationState.targetText.value = "";
       translationState.saveLocalStorage();
